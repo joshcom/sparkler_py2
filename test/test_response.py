@@ -30,5 +30,13 @@ class TestResponse(unittest.TestCase):
     def test_works_like_a_dict(self):
         self.assertTrue(self.response['Success'])
         self.assertEqual("20100000000000000000000000", self.response['Results'][0]["Id"])
+
+        # Check iterable
+        for key in self.response:
+            if key == 'Success':
+                self.assertTrue(self.response[key])
+
+        # Verify assignment
         self.response['Success'] = False
         self.assertFalse(self.response['Success'])
+        

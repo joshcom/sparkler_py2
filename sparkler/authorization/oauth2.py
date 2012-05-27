@@ -1,8 +1,8 @@
 import time
 import urllib.parse
 
-# TODO! Authorization!  Refresh/Access tokens must be managed and setable.
-# TODO! Register a client
+# TODO: This is a /type/ of api client? 
+# TODO: Tokens must be managed
 class Client:
     def __init__(self, consumer, authorization_endpoint, api_endpoint):
         self.consumer = consumer

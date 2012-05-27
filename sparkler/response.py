@@ -25,4 +25,4 @@ class Response:
         return delattr(self, key)
 
     def __iter__(self):
-        self.__dict__.__iter__
+        return self.__dict__.__iter__()
