@@ -9,13 +9,12 @@ class Request:
     def get(self,path,parameters=None):
         return self._request('GET', path, parameters=parameters)
 
+    def post(self,path,body=None):
+        return self._request('POST', path, body=body)
+
     def put(self,path,body=None):
         pass # TODO
         # return self._request('PUT', path, body=body)
-
-    def post(self,path,body=None):
-        pass # TODO
-        # return self._request('POST', path, body=body)
 
     def delete(self,path,parameters=None):
         pass # TODO
@@ -23,7 +22,8 @@ class Request:
 
     def build_request_uri(self, path, parameters=None):
         base_uri = self.endpoint.strip("/ ")
-        uri = "{0}{1}".format(base_uri, "/" + path.strip("/ "))
+        path = path.strip("/ ")
+        uri = "{0}{1}".format(base_uri, "/" + path).rstrip("/")
         return self.attach_parameters_to_uri(uri, parameters)
 
     def attach_parameters_to_uri(self, uri, parameters):
@@ -41,8 +41,13 @@ class Request:
     def _request(self, method, path, headers=None, parameters=None, body=None):
         http = httplib2.Http()
         uri = self.build_request_uri(path,parameters=parameters)
-        response, content = http.request(uri, 'GET', headers=headers, 
+
+        if body != None:
+          body = urllib.parse.urlencode(body)
+
+        response, content = http.request(uri, method, headers=headers, 
                 body=body)
+
         return Response.parse(content.decode('utf-8')) # The decode here feels weak.
 
 class ApiRequest(Request):
@@ -55,8 +60,9 @@ class ApiRequest(Request):
             path = "/"+self.data_access_version+"/" + path.strip("/ ")
         return path
 
+    # TODO: Timeouts and other options
     def _request(self, method, path, parameters=None, body=None):
-        path = build_api_path(path)
+        path = self.build_api_path(path)
         headers = {"Authorization": "OAuth ACCESS_CODE_GOES_HERE_FOR_NOW"}
         return super(ApiRequest, self)._request(method, path, headers=headers,
                 parameters=parameters, body=body)

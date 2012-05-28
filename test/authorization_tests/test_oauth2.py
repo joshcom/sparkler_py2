@@ -1,6 +1,9 @@
 import unittest
 import time
+from sparkler.errors import *
 from sparkler.authorization import oauth2
+from sparkler.response import Response
+from mock import MagicMock
 
 class TestOauth2Client(unittest.TestCase):
     def setUp(self):
@@ -11,12 +14,12 @@ class TestOauth2Client(unittest.TestCase):
                 "https://developers.sparkplatform.com/oauth2",
                 "https://developers.sparkapi.com")
 
+    def mock_token_success(self):
+        self.client._perform_token_request = MagicMock(return_value=Response.parse(\
+               '{"expires_in":86400,"refresh_token":"11111","access_token":"22222"}'))
+
     def test_init(self):
         self.assertIsInstance(self.client, oauth2.Client)
-
-    def test_generate_default_token_endpoint(self):
-        self.assertEqual("https://developers.sparkapi.com/token",
-                self.client.token_endpoint)
 
     def test_authorization_uri(self):
         # Seriously, what the heck am I doing here...
@@ -29,15 +32,35 @@ class TestOauth2Client(unittest.TestCase):
         self.assertEqual("https://developers.sparkplatform.com/oauth2?",
                 url)
 
-    def test_authorization_uri_with_custom_code(self):
-        url = self.client.authorization_uri("custom")
-        self.assertTrue(url.find("response_type=custom") > 0)
+    def test_grant_failture(self):
+        self.client._perform_token_request = MagicMock(return_value=Response.parse(\
+               '{"error_description":"The access grant you supplied is invalid",\
+                 "error":"invalid_grant"}'))
+        self.assertRaises(AuthFailureException, self.client.grant, ("12345"))
 
+    def test_grant_success(self):
+        self.mock_token_success()
+        self.assertIsInstance(self.client.grant("1234"), oauth2.Token)
+        self.assertEqual("11111", self.client.token.refresh_token)
+        self.assertEqual("22222", self.client.token.access_token)
+
+    def test_refresh_success(self):
+        self.mock_token_success()
+        self.assertIsInstance(self.client.refresh("1234"), oauth2.Token)
+        self.assertEqual("11111", self.client.token.refresh_token)
+        self.assertEqual("22222", self.client.token.access_token)
+
+    def test_refresh_defaults_to_registered_token(self):
+        self.mock_token_success()
+        self.client.register_token(self.token)
+        self.assertEqual("my_token", self.client.token.access_token)
+        self.assertIsInstance(self.client.refresh(), oauth2.Token)
+        self.assertEqual("22222", self.client.token.access_token)
 
 class TestOauth2Consumer(unittest.TestCase):
     def setUp(self):
         self.consumer = oauth2.Consumer("my_key", "my_secret", 
-                "https://www.joshcom.net")
+            "https://www.joshcom.net")
 
     def test_init(self):
         self.assertEqual("my_key", self.consumer.key)

@@ -13,7 +13,7 @@ class TestRequest(unittest.TestCase):
       self.assertEqual("https://sparkapi.com/v1/listings", uri)
 
       uri = self.request.build_request_uri("")
-      self.assertEqual("https://sparkapi.com/", uri)
+      self.assertEqual("https://sparkapi.com", uri)
 
       uri = self.request.build_request_uri("/v1/listings", 
           {"_filter":"City Eq Fargo"})
@@ -34,7 +34,7 @@ class TestRequest(unittest.TestCase):
         self.assertEqual(uri.count("?"), 1)
 
     def test_get_as_request_wrapper(self):
-        self.request._request = MagicMock(response.Response.parse("{\"Success\":true}"))
+        self.request._request = MagicMock(return_value=response.Response.parse("{\"Success\":true}"))
         self.assertTrue(self.request.get("listings")["Success"])
 
 class TestApiRequest(unittest.TestCase):
