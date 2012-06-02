@@ -1,7 +1,7 @@
 import unittest
 import time
 from sparkler.errors import *
-from sparkler.authorization import oauth2
+from sparkler.auth import oauth2
 from sparkler.response import Response
 from mock import MagicMock
 
