@@ -1,19 +1,18 @@
 import time
 import urllib.parse
 from sparkler.transport import Request, ApiRequest
+from sparkler.auth.client import AuthClient
 from sparkler.errors import *
 
-class Client:
-    def __init__(self, consumer, authorization_endpoint, api_endpoint):
-        self.consumer = consumer
-        self.authorization_endpoint = authorization_endpoint
-        self.api_endpoint = api_endpoint
+class OAuth2Client(AuthClient):
+    def __init__(self, consumer, auth_endpoint_uri, api_endpoint_uri):
+        super(OAuth2Client, self).__init__(consumer, auth_endpoint_uri, api_endpoint_uri)
         self.token = None
 
     def authorization_uri(self):
         parameters = self._authorization_parameters()
         parameters["response_type"] = "code"
-        return Request(self.authorization_endpoint).build_request_uri("", 
+        return Request(self.auth_endpoint_uri).build_request_uri("", 
                 parameters)
 
     def grant(self, code):
@@ -50,26 +49,19 @@ class Client:
         return self.register_token(Token.parse(response))
 
     def _perform_token_request(self, parameters):
-        request = ApiRequest(self.api_endpoint)
+        request = ApiRequest(self.api_endpoint_uri)
         return request.post("oauth2/grant", parameters)
 
     def _authorization_parameters(self):
         return {
             "client_id": self.consumer.key,
-            "redirect_uri": self.consumer.redirect_uri
+            "redirect_uri": self.consumer.callback_uri
         }
 
     def _grant_parameters(self):
         parameters = self._authorization_parameters()
         parameters["client_secret"] = self.consumer.secret
         return parameters
-
-
-class Consumer:
-    def __init__(self, key, secret, redirect_uri):
-        self.key = key
-        self.secret = secret
-        self.redirect_uri = redirect_uri
 
 class Token:
     @staticmethod

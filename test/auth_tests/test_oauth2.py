@@ -3,14 +3,15 @@ import time
 from sparkler.errors import *
 from sparkler.auth import oauth2
 from sparkler.response import Response
+from sparkler.auth import client
 from mock import MagicMock
 
 class TestOauth2Client(unittest.TestCase):
     def setUp(self):
-        self.consumer = oauth2.Consumer("my_key", "my_secret", 
+        self.consumer = client.Consumer("my_key", "my_secret", 
                 "https://www.joshcom.net")
         self.token = oauth2.Token.parse(TestOauth2Token.example_token())
-        self.client = oauth2.Client(self.consumer,
+        self.client = oauth2.OAuth2Client(self.consumer,
                 "https://developers.sparkplatform.com/oauth2",
                 "https://developers.sparkapi.com")
 
@@ -19,7 +20,7 @@ class TestOauth2Client(unittest.TestCase):
                '{"expires_in":86400,"refresh_token":"11111","access_token":"22222"}'))
 
     def test_init(self):
-        self.assertIsInstance(self.client, oauth2.Client)
+        self.assertIsInstance(self.client, oauth2.OAuth2Client)
 
     def test_authorization_uri(self):
         # Seriously, what the heck am I doing here...
@@ -56,14 +57,6 @@ class TestOauth2Client(unittest.TestCase):
         self.assertEqual("my_token", self.client.token.access_token)
         self.assertIsInstance(self.client.refresh(), oauth2.Token)
         self.assertEqual("22222", self.client.token.access_token)
-
-class TestOauth2Consumer(unittest.TestCase):
-    def setUp(self):
-        self.consumer = oauth2.Consumer("my_key", "my_secret", 
-            "https://www.joshcom.net")
-
-    def test_init(self):
-        self.assertEqual("my_key", self.consumer.key)
 
 class TestOauth2Token(unittest.TestCase):
     @staticmethod
