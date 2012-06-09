@@ -1,6 +1,6 @@
 import unittest
 import time
-from sparkler.errors import *
+from sparkler.exceptions import *
 from sparkler.auth import oauth2
 from sparkler.response import Response
 from sparkler.auth import client

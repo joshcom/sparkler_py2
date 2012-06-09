@@ -16,6 +16,29 @@ class AuthClient(object):
         self.auth_endpoint_uri = auth_endpoint_uri
         self.api_endpoint_uri = api_endpoint_uri
 
+    def authorize_request(self, headers):
+        '''To be implemented by the client.
+        Attaches authorization headers to headers.
+
+        Arguments:
+        headers -- A dictionary for request headers, which
+                   will be modified.
+        '''
+        raise NotImplementedError()
+
+    def register_session(self, access_token, refresh_token=None, 
+            expires_at=None):
+        '''To be implemented by the client.
+        Registers an existing session with the auth client.
+
+        Arguments:
+        access_token -- The authorization token
+        refresh_token -- (optional) The authorization refresh token, if
+                         supported
+        expires_at -- (optional) The time when the token expires.
+        '''
+        raise NotImplementedError()
+
 class Consumer(object):
     '''Represents a client key, or a record of credentials for API access.
 

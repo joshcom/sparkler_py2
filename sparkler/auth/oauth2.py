@@ -5,7 +5,7 @@ import time
 import urllib.parse
 from sparkler.transport import Request, ApiRequest
 from sparkler.auth.client import AuthClient
-from sparkler.errors import *
+from sparkler.exceptions import *
 
 class OAuth2Client(AuthClient):
     '''The OAuth 2 authorization client
@@ -21,6 +21,32 @@ class OAuth2Client(AuthClient):
     def __init__(self, consumer, auth_endpoint_uri, api_endpoint_uri):
         super(OAuth2Client, self).__init__(consumer, auth_endpoint_uri, api_endpoint_uri)
         self.token = None
+
+    def authorize_request(self, headers):
+        '''Attaches authorization headers to headers, e.g.:
+        Authorization: OAuth ACCESS_TOKEN
+
+        Arguments
+        headers -- A dictionary for request headers, which
+                   will be modified.
+        '''
+        if self.token == None or self.token.access_token == None:
+            raise ApplicationUnauthorizedException()
+
+        headers["Authorization"] = ("OAuth %s" % self.token.access_token)
+
+    def register_session(self, access_token, refresh_token=None, 
+            expires_at=None):
+        '''
+        Registers an existing session with the auth client.
+
+        Arguments:
+        access_token -- The authorization token
+        refresh_token -- The refresh token
+        expires_at -- (optional) The time when the token expires.
+        '''
+        self.register_token(Token(access_token, refresh_token, expires_at))
+
 
     def authorization_uri(self):
         '''Returns a string of the full URI, with paramters, the

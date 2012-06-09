@@ -121,15 +121,19 @@ class ApiRequest(Request):
     '''Handles HTTP requests specifically intended for the Spark API endpoint
     (e.g. https://sparkapi.com, or subdomains.)
 
-    Public isntance variables:
+    Public instance variables:
     endpoint    -- The host to send requests to. 
-    data_access_version -- The api version, defaults to "v1"
+    auth_client -- (optional) The AuthClient instance that will attatch the 
+                   necessary authorization headers to each request.
+    data_access_version -- (optional) The api version, defaults to "v1"
     '''
 
-    def __init__(self, data_access_endpoint, data_access_version="v1"):
+    def __init__(self, data_access_endpoint, auth_client=None, 
+          data_access_version="v1"):
         super(ApiRequest, self).__init__(data_access_endpoint)
         self.endpoint = data_access_endpoint
         self.data_access_version = data_access_version
+        self.auth_client = auth_client
 
     def build_api_path(self, path):
         '''Returns a string that formats the API path with the version
@@ -148,6 +152,9 @@ class ApiRequest(Request):
         (self.get, etc.) rather than directly.
         '''
         path = self.build_api_path(path)
-        headers = {"Authorization": "OAuth ACCESS_CODE_GOES_HERE_FOR_NOW"}
+        headers = {}
+        if self.auth_client != None:
+            self.auth_client.authorize_request(headers=headers)
+
         return super(ApiRequest, self)._request(method, path, headers=headers,
                 parameters=parameters, body=body)
