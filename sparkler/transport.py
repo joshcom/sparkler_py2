@@ -3,6 +3,7 @@
 '''
 import urllib
 import httplib2
+from sparkler.exceptions import *
 from sparkler.response import Response
 
 class Request(object):
@@ -110,12 +111,19 @@ class Request(object):
         if body != None:
             body = urllib.parse.urlencode(body)
 
-        response, content = http.request(uri, method, headers=headers, 
-                body=body)
+        response, content = self._http_request(uri, method, headers, body)
+        parsed_response = Response.parse(content.decode('utf-8'))
 
-        # Check response -- raise error?
+        if response >= 200 and response <= 299:
+            return parsed_response 
+        else:
+            raise HttpStatusNotSuccessfulException(parsed_response)
 
-        return Response.parse(content.decode('utf-8'))
+    def _http_request(uri, method, headers=None, body=None):
+        '''A dumb wrapper for http.request, largely for stubbing
+        when testing.
+        '''
+        http.request(uri, method, headers=headers, body=body)
 
 class ApiRequest(Request):
     '''Handles HTTP requests specifically intended for the Spark API endpoint

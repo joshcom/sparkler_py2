@@ -3,6 +3,8 @@ import json
 from sparkler import transport
 from sparkler import response
 from mock import MagicMock
+from sparkler.exceptions import *
+from test.sparkler_test_helpers import SparklerStubber
 
 class TestRequest(unittest.TestCase):
     def setUp(self):
@@ -36,6 +38,16 @@ class TestRequest(unittest.TestCase):
     def test_get_as_request_wrapper(self):
         self.request._request = MagicMock(return_value=response.Response.parse("{\"Success\":true}"))
         self.assertTrue(self.request.get("listings")["Success"])
+
+    def test_invalid_json(self):
+        self.request._http_request = MagicMock(return_value=SparklerStubber.http_response(200, 
+            "<html><head><title>Hi</title></head></html>"))
+        self.assertRaises(ValueError, self.request.get, ("listings"))
+
+    def test_api_error(self):
+        self.request._http_request = MagicMock(return_value=SparklerStubber.http_response(400, 
+            "{\"Success\": false, \"Message\": \"Session token has expired\", \"Code\": 1020}"))
+        self.assertRaises(HttpStatusNotSuccessfulException, self.request.get, ("listings"))
 
 class TestApiRequest(unittest.TestCase):
     def setUp(self):

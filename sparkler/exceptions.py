@@ -15,3 +15,11 @@ class AuthFailureException(Exception):
     '''Signals a general failure with an authorization attempt.
     '''
     pass
+
+class HttpStatusNotSuccessfulException(Exception):
+    '''Raised any time the HTTP response was not >=200 and <=299.
+    Public attributes:
+    response -- The Response object of the failed request.
+    '''
+    def __init__(self, response):
+        self.response = response
