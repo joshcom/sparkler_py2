@@ -164,5 +164,17 @@ class ApiRequest(Request):
         if self.auth_client != None:
             self.auth_client.authorize_request(headers=headers)
 
-        return super(ApiRequest, self)._request(method, path, headers=headers,
+        try:
+            response = super(ApiRequest, self)._request(method, path, headers=headers,
                 parameters=parameters, body=body)
+        except HttpStatusNotSuccessfulException as e:
+            raise self._raise_http_status_exception(e)
+
+        return response
+
+    def _raise_http_status_exception(self, e):
+        code = e.response["Code"]
+        if code == 1020:
+            raise AuthExpiredException(e.response)
+        else:
+            raise e

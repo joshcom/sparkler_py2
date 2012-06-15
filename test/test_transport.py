@@ -51,6 +51,19 @@ class TestRequest(unittest.TestCase):
 
 class TestApiRequest(unittest.TestCase):
     def setUp(self):
-        self.request = transport.Request("https://sparkapi.com/")
+        self.request = transport.ApiRequest("https://sparkapi.com/")
+
+    def test_raise_special_http_status_exception(self):
+        r = response.Response.parse("{\"Success\":false, \"Code\":1020}")
+        e = HttpStatusNotSuccessfulException(r)
+        self.assertRaises(AuthExpiredException,
+                self.request._raise_http_status_exception, (e))
+
+    def test_raise_default_http_status_exception(self):
+        r = response.Response.parse("{\"Success\":false, \"Code\":11020}")
+        e = HttpStatusNotSuccessfulException(r)
+        self.assertRaises(HttpStatusNotSuccessfulException,
+                self.request._raise_http_status_exception, (e))
+                    
 
 

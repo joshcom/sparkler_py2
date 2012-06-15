@@ -59,3 +59,4 @@ Raised when a step in the authorization process has failed.
 TODO
 ========
 * Acceptance tests against live API
+* Impement PUT, DELETE
