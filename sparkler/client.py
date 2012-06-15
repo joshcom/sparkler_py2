@@ -12,6 +12,15 @@ class SparkClient:
                class or the README for more details.
     request -- The ApiRequest object.  All useful methods are wrapped by 
                the SparkClient object itself.
+
+    The following methods are deligated to...
+    self.auth:
+        -- register_session
+    self.request:
+        -- get
+        -- post
+        -- put
+        -- delete
     '''
     def __init__(self, client_key, client_secret, auth_mode="hybrid", 
             auth_endpoint_uri="https://sparkplatform.com/oauth2",
@@ -23,38 +32,10 @@ class SparkClient:
         self.request = ApiRequest(api_endpoint_uri, self.auth, 
                          data_access_version)
 
-
-    def register_session(self, access_token, refresh_token=None):
-        '''Registers and existing session with the client.
-        
-        Arguments:
-        access_token -- The token allowing access to the API
-        refresh_token -- The token allowing a session to be refreshed.
-        '''
-        self.auth.register_session(access_token, refresh_token)
-
-    ###
-    # These four methods need a better proxy to self.request.
-    # Worst case scenario, this may as well just inherit ApiRequset
-    ###
-    def get(self, path, parameters=None):
-        '''A wrapper for self.request.get'''
-        return self.request.get(path, parameters)
-
-    def post(self, path, body=None):
-        '''A wrapper for self.request.post'''
-        return self.request.post(path, body)
-
-    def put(self, path, body=None):
-        '''A wrapper for self.request.put'''
-        return self.request.put(path, body)
-
-    def delete(self, path, parameters=None):
-        '''A wrapper for self.request.delete'''
-        return self.request.delete(path, parameters)
-
-#    def __getattr__(self, attrib):
-#        if attrib in ["get", "post", "put", "delete"]:
-#            getattr(self.request, attrib)()
-#        else:
-#            getattr(self, attrib)
+    def __getattr__(self, attrib):
+        if attrib in ["get", "post", "put", "delete"]:
+            return getattr(self.request, attrib)
+        elif attrib in ["register_session"]:
+            return getattr(self.auth, attrib)
+        else:
+            return getattr(self, attrib)
