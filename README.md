@@ -37,6 +37,13 @@ Exceptions
 Custom sparkler exceptions are available in exceptions.py.  They are fairly well documented 
 in that file, but to reiterate:
 
+#### HttpStatusNotSuccessfulException
+Raised when a request to the API resulted in a non-2xx code, and did not fit the use
+case for another exception above.  This exception instance will have the public 
+attribute "response", which is an instance of sparkler.response.Response() and contains
+the API error code and error message.
+
+All other exceptions extend HttpStatusNotSuccessfulException
 
 #### ApplicationUnauthorizedException
 Raised if the application has not yet been authorized by the end user
@@ -48,11 +55,6 @@ Raised when the authorization token has expired, thus requiring a refresh or a n
 #### AuthFailureException
 Raised when a step in the authorization process has failed. 
 
-#### HttpStatusNotSuccessfulException
-Raised when a request to the API resulted in a non-2xx code, and did not fit the use
-case for another exception above.  This exception instance will have the public 
-attribute "response", which is an instance of sparkler.response.Response() and contains
-the API error code and error message.
 
 TODO
 ========
