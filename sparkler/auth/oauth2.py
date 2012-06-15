@@ -99,10 +99,10 @@ class OAuth2Client(AuthClient):
         return self.token
 
     def _token_request(self, parameters):
-        response = self._perform_token_request(parameters)
-
-        if "error" in response:
-            raise AuthFailureException(response)
+        try:
+            response = self._perform_token_request(parameters)
+        except HttpStatusNotSuccessfulException as e:
+            raise AuthFailureException(e.response)
 
         return self.register_token(Token.parse(response))
 

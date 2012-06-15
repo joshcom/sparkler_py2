@@ -58,6 +58,4 @@ Raised when a step in the authorization process has failed.
 
 TODO
 ========
-* Catch HttpStatusNotSuccessfulException in oauth2.py, and return appropriate other exception
-* Extend all exceptions with HttpStatusNotSuccessfulException
 * Acceptance tests against live API

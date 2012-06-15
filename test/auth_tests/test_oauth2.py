@@ -5,6 +5,7 @@ from sparkler.auth import oauth2
 from sparkler.response import Response
 from sparkler.auth import client
 from mock import MagicMock
+from test.sparkler_test_helpers import SparklerStubber
 
 class TestOauth2Client(unittest.TestCase):
     def setUp(self):
@@ -34,9 +35,10 @@ class TestOauth2Client(unittest.TestCase):
                 url)
 
     def test_grant_failture(self):
-        self.client._perform_token_request = MagicMock(return_value=Response.parse(\
+        self.client._perform_token_request = MagicMock(side_effect=\
+                SparklerStubber.http_status_not_successful(Response.parse(\
                '{"error_description":"The access grant you supplied is invalid",\
-                 "error":"invalid_grant"}'))
+                 "error":"invalid_grant"}')))
         self.assertRaises(AuthFailureException, self.client.grant, ("12345"))
 
     def test_grant_success(self):

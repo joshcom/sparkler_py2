@@ -6,7 +6,7 @@ class HttpStatusNotSuccessfulException(Exception):
     Public attributes:
     response -- The Response object of the failed request.
     '''
-    def __init__(self, response):
+    def __init__(self, response=None):
         self.response = response
 
 class ApplicationUnauthorizedException(HttpStatusNotSuccessfulException):
