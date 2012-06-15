@@ -1,3 +1,5 @@
+#### NOT YET READY
+
 Sparkler
 ========
 A Python 3 client for Spark API: http://sparkplatform.com/docs/overview/api
