@@ -102,7 +102,7 @@ class OAuth2Client(AuthClient):
         response = self._perform_token_request(parameters)
 
         if "error" in response:
-            raise AuthFailureException(response["error"], response["error_description"])
+            raise AuthFailureException(response)
 
         return self.register_token(Token.parse(response))
 

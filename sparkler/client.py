@@ -24,14 +24,14 @@ class SparkClient:
                          data_access_version)
 
 
-    def register_session(self, access_token, refresh_token):
+    def register_session(self, access_token, refresh_token=None):
         '''Registers and existing session with the client.
         
         Arguments:
         access_token -- The token allowing access to the API
         refresh_token -- The token allowing a session to be refreshed.
         '''
-        pass
+        self.auth.register_session(access_token, refresh_token)
 
     ###
     # These four methods need a better proxy to self.request.
