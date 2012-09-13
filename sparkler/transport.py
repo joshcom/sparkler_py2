@@ -162,7 +162,7 @@ class ApiRequest(Request):
         path = self.build_api_path(path)
         headers = {}
         if self.auth_client != None:
-            self.auth_client.authorize_request(headers=headers)
+            self.auth_client.authorize_request(headers=headers,parameters=parameters,path=path,body=body)
 
         try:
             response = super(ApiRequest, self)._request(method, path, headers=headers,

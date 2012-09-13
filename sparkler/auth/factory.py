@@ -1,11 +1,13 @@
 from sparkler.auth.client import *
 from sparkler.auth.oauth2 import OAuth2Client
+from sparkler.auth.spark_auth import SparkAuthClient
 
 class AuthFactory:
     '''An AuthClient factory that returns an instance for the appropriate
     auth mechanism as defined in auth_mode'''
     auth_modes = {
-            "oauth2": OAuth2Client
+            "oauth2": OAuth2Client,
+            "spark_auth": SparkAuthClient
     }
 
     @staticmethod

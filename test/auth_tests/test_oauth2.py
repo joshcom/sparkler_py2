@@ -11,7 +11,7 @@ class TestOauth2Client(unittest.TestCase):
     def setUp(self):
         self.consumer = client.Consumer("my_key", "my_secret", 
                 "https://www.joshcom.net")
-        self.token = oauth2.Token.parse(TestOauth2Token.example_token())
+        self.token = oauth2.OAuth2Token.parse(TestOauth2Token.example_token())
         self.client = oauth2.OAuth2Client(self.consumer,
                 "https://developers.sparkplatform.com/oauth2",
                 "https://developers.sparkapi.com")
@@ -43,13 +43,13 @@ class TestOauth2Client(unittest.TestCase):
 
     def test_grant_success(self):
         self.mock_token_success()
-        self.assertIsInstance(self.client.grant("1234"), oauth2.Token)
+        self.assertIsInstance(self.client.grant("1234"), oauth2.OAuth2Token)
         self.assertEqual("11111", self.client.token.refresh_token)
         self.assertEqual("22222", self.client.token.access_token)
 
     def test_refresh_success(self):
         self.mock_token_success()
-        self.assertIsInstance(self.client.refresh("1234"), oauth2.Token)
+        self.assertIsInstance(self.client.refresh("1234"), oauth2.OAuth2Token)
         self.assertEqual("11111", self.client.token.refresh_token)
         self.assertEqual("22222", self.client.token.access_token)
 
@@ -57,7 +57,7 @@ class TestOauth2Client(unittest.TestCase):
         self.mock_token_success()
         self.client.register_token(self.token)
         self.assertEqual("my_token", self.client.token.access_token)
-        self.assertIsInstance(self.client.refresh(), oauth2.Token)
+        self.assertIsInstance(self.client.refresh(), oauth2.OAuth2Token)
         self.assertEqual("22222", self.client.token.access_token)
 
 class TestOauth2Token(unittest.TestCase):
@@ -70,10 +70,10 @@ class TestOauth2Token(unittest.TestCase):
         }
 
     def setUp(self):
-        self.token = oauth2.Token.parse(TestOauth2Token.example_token())
+        self.token = oauth2.OAuth2Token.parse(TestOauth2Token.example_token())
 
     def test_parse_results_in_token(self):
-        self.assertIsInstance(self.token, oauth2.Token)
+        self.assertIsInstance(self.token, oauth2.OAuth2Token)
 
     def test_expiration(self):
         self.assertIsInstance(self.token.expires_at, time.struct_time)

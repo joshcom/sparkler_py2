@@ -1,11 +1,9 @@
 '''The OAuth 2 authorization client and supporting classes.  
 Intended for instantiation through AuthFactory, rather than directly.
 '''
-import time
+
 import urllib.parse
-from sparkler.transport import Request, ApiRequest
-from sparkler.auth.client import AuthClient
-from sparkler.exceptions import *
+from sparkler.auth.client import *
 
 class OAuth2Client(AuthClient):
     '''The OAuth 2 authorization client
@@ -16,13 +14,13 @@ class OAuth2Client(AuthClient):
                          redirect the user to.
     api_endpoint_uri  -- The URI of the API which we are requesting
                          authorizatino for.
-    token -- An instance of the Token class, which contains the access
+    token -- An instance of the OAuth2Token class, which contains the access
              and refresh tokens for an API authorization.'''
     def __init__(self, consumer, auth_endpoint_uri, api_endpoint_uri):
         super(OAuth2Client, self).__init__(consumer, auth_endpoint_uri, api_endpoint_uri)
         self.token = None
 
-    def authorize_request(self, headers):
+    def authorize_request(self, headers, path=None, parameters=None, body=None):
         '''Attaches authorization headers to headers, e.g.:
         Authorization: OAuth ACCESS_TOKEN
 
@@ -45,7 +43,7 @@ class OAuth2Client(AuthClient):
         refresh_token -- The refresh token
         expires_at -- (optional) The time when the token expires.
         '''
-        self.register_token(Token(access_token, refresh_token, expires_at))
+        self.register_token(OAuth2Token(access_token, refresh_token, expires_at))
 
 
     def authorization_uri(self):
@@ -88,23 +86,13 @@ class OAuth2Client(AuthClient):
         parameters["refresh_token"] = refresh_token
         return self._token_request(parameters)
 
-    def register_token(self, token):
-        '''Registers an existing authorization.
-
-        Arguments:
-        token -- A Token object as a record of the existing authorization
-        and refresh tokens.
-        '''
-        self.token = token
-        return self.token
-
     def _token_request(self, parameters):
         try:
             response = self._perform_token_request(parameters)
         except HttpStatusNotSuccessfulException as e:
             raise AuthFailureException(e.response)
 
-        return self.register_token(Token.parse(response))
+        return self.register_token(OAuth2Token.parse(response))
 
     def _perform_token_request(self, parameters):
         request = ApiRequest(self.api_endpoint_uri)
@@ -121,8 +109,8 @@ class OAuth2Client(AuthClient):
         parameters["client_secret"] = self.consumer.secret
         return parameters
 
-class Token:
-    '''A record of an OAuth2 authrozation.
+class OAuth2Token(Token):
+    '''A record of an OAuth2 authorization.
 
     Public instance variables:
     access_token -- The access token, to be used in the Authorization header
@@ -141,16 +129,5 @@ class Token:
                      successful API grant/refresh request.
         '''
         expires_at = time.localtime(time.time() + json_dict['expires_in'])
-        return Token(json_dict['access_token'], json_dict['refresh_token'],
+        return OAuth2Token(json_dict['access_token'], json_dict['refresh_token'],
                 expires_at)
-
-
-    def __init__(self, access_token, refresh_token, expires_at=None):
-        self.access_token = access_token
-        self.refresh_token = refresh_token
-        self.expires_at = expires_at
-
-    def expired(self):
-        '''Returns True if the token is expired, or false if not.
-        '''
-        return time.localtime() >= self.expires_at

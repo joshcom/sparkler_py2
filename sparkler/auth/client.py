@@ -1,3 +1,6 @@
+import time
+from sparkler.transport import Request, ApiRequest
+from sparkler.exceptions import *
 '''Base classes to be used or extended by all Auth clients.
 '''
 
@@ -16,13 +19,17 @@ class AuthClient(object):
         self.auth_endpoint_uri = auth_endpoint_uri
         self.api_endpoint_uri = api_endpoint_uri
 
-    def authorize_request(self, headers):
+    def authorize_request(self, headers, path=None, parameters=None, body=None):
         '''To be implemented by the client.
         Attaches authorization headers to headers.
 
         Arguments:
         headers -- A dictionary for request headers, which
                    will be modified.
+        path -- (optional) The resource path being access (e.g. /v1/contacts)
+        parameters -- (optional) The hash of parameters to send along with
+                      the request
+        body -- (optional) The POST/PUT body
         '''
         raise NotImplementedError()
 
@@ -39,17 +46,56 @@ class AuthClient(object):
         '''
         raise NotImplementedError()
 
+    def register_token(self, token):
+        '''Registers an existing authorization.
+
+        Arguments:
+        token -- A Token object as a record of the existing authorization
+        and refresh tokens.
+        '''
+        self.token = token
+        return self.token
+
 class Consumer(object):
     '''Represents a client key, or a record of credentials for API access.
 
     Public instance variables:
     key -- The API client key
     secret --  The API client secret
-    callback_uri -- The URI to the callback for the application, to which
+    callback_uri -- (optional) The URI to the callback for the application, to which
                     the end user will be redirected to once they have granted
                     the application access to their data.
     '''
-    def __init__(self, key, secret, callback_uri):
+    def __init__(self, key, secret, callback_uri=None):
         self.key = key
         self.secret = secret
         self.callback_uri = callback_uri 
+
+class Token:
+    '''A record of an authorization. Token.parse should be implemented by child classes
+
+    Public instance variables:
+    access_token -- The access token, to be used in the Authorization header
+                    when requesting data.
+    refresh_token -- The refresh token, to be used when refreshing an
+                     expired access token.
+    expires_at -- The time object, at when the token will expire.
+    '''
+
+    @staticmethod
+    def parse(json_dict):
+        pass
+
+    def __init__(self, access_token, refresh_token=None, expires_at=None):
+        self.access_token = access_token
+        self.refresh_token = refresh_token
+        self.expires_at = expires_at
+        self.token = None
+
+    def expired(self):
+        '''Returns True if the token is expired, or false if not.
+        '''
+        if self.expires_at == None:
+            return False
+        else:
+            return time.localtime() >= self.expires_at
