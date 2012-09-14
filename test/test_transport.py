@@ -40,12 +40,12 @@ class TestRequest(unittest.TestCase):
         self.assertTrue(self.request.get("listings")["Success"])
 
     def test_invalid_json(self):
-        self.request._http_request = MagicMock(return_value=SparklerStubber.http_response(200, 
+        self.request._http_request = MagicMock(return_value=SparklerStubber.http_response({'status':'200'}, 
             "<html><head><title>Hi</title></head></html>"))
         self.assertRaises(ValueError, self.request.get, ("listings"))
 
     def test_api_error(self):
-        self.request._http_request = MagicMock(return_value=SparklerStubber.http_response(400, 
+        self.request._http_request = MagicMock(return_value=SparklerStubber.http_response({'status':'400'}, 
             "{\"Success\": false, \"Message\": \"Session token has expired\", \"Code\": 1020}"))
         self.assertRaises(HttpStatusNotSuccessfulException, self.request.get, ("listings"))
 

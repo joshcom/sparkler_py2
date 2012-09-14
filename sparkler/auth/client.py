@@ -19,17 +19,20 @@ class AuthClient(object):
         self.auth_endpoint_uri = auth_endpoint_uri
         self.api_endpoint_uri = api_endpoint_uri
 
-    def authorize_request(self, headers, path=None, parameters=None, body=None):
+    def authorize_request(self, headers, parameters, path=None, body=None):
         '''To be implemented by the client.
         Attaches authorization headers to headers.
 
         Arguments:
         headers -- A dictionary for request headers, which
                    will be modified.
-        path -- (optional) The resource path being access (e.g. /v1/contacts)
-        parameters -- (optional) The hash of parameters to send along with
+        parameters -- The hash of parameters to send along with
                       the request
+        path -- (optional) The resource path being access (e.g. /v1/contacts)
         body -- (optional) The POST/PUT body
+
+        Returns:
+            Two return values: headers, parameters
         '''
         raise NotImplementedError()
 

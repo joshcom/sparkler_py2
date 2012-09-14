@@ -28,7 +28,7 @@ class SparkClient:
             auth_callback_uri=None,
             data_access_version="v1"):
         self.auth = AuthFactory.create(auth_mode, client_key, client_secret,
-                auth_endpoint_uri, api_endpoint_uri, auth_callback_uri)
+                      auth_endpoint_uri, api_endpoint_uri, auth_callback_uri)
         self.request = ApiRequest(api_endpoint_uri, self.auth, 
                          data_access_version)
 

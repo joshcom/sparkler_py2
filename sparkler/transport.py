@@ -105,7 +105,6 @@ class Request(object):
         '''Performs an HTTP request.  Should be called through a wrapper method
         (self.get, etc.) rather than directly.
         '''
-        http = httplib2.Http()
         uri = self.build_request_uri(path, parameters=parameters)
 
         if body != None:
@@ -114,16 +113,18 @@ class Request(object):
         response, content = self._http_request(uri, method, headers, body)
         parsed_response = Response.parse(content.decode('utf-8'))
 
-        if response >= 200 and response <= 299:
+        status = int(response['status'])
+        if status >= 200 and status <= 299:
             return parsed_response 
         else:
             raise HttpStatusNotSuccessfulException(parsed_response)
 
-    def _http_request(uri, method, headers=None, body=None):
+    def _http_request(self, uri, method, headers=None, body=None):
         '''A dumb wrapper for http.request, largely for stubbing
         when testing.
         '''
-        http.request(uri, method, headers=headers, body=body)
+        http = httplib2.Http()
+        return http.request(uri, method, headers=headers, body=body)
 
 class ApiRequest(Request):
     '''Handles HTTP requests specifically intended for the Spark API endpoint
@@ -160,9 +161,11 @@ class ApiRequest(Request):
         (self.get, etc.) rather than directly.
         '''
         path = self.build_api_path(path)
-        headers = {}
+        headers = {
+          "X-SparkApi-User-Agent" : "PythonClient: TODO"
+        }
         if self.auth_client != None:
-            self.auth_client.authorize_request(headers=headers,parameters=parameters,path=path,body=body)
+            headers, parameters = self.auth_client.authorize_request(headers,parameters,path=path,body=body)
 
         try:
             response = super(ApiRequest, self)._request(method, path, headers=headers,

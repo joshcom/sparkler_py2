@@ -9,8 +9,15 @@ import hashlib
 class SparkAuthClient(AuthClient):
     def __init__(self, consumer, auth_endpoint_uri, api_endpoint_uri):
         super(SparkAuthClient, self).__init__(consumer, auth_endpoint_uri, api_endpoint_uri)
+        self.token = None
 
-    def authorize_request(self, headers, path, parameters=None, body=None):
+    def init_session(self):
+        request = ApiRequest(self.api_endpoint_uri)
+        results = request.post("/v1/session", {"ApiKey":self.consumer.key,
+                               "ApiSig":self._generate_signature("/v1/session", None, None)})
+        self.register_session(results["Results"][0]["AuthToken"])
+
+    def authorize_request(self, headers, parameters, path, body=None):
         '''To be implemented by the client.
         Attaches authorization headers to headers.
 
@@ -21,11 +28,16 @@ class SparkAuthClient(AuthClient):
         parameters -- (optional) The hash of parameters to send along with
                       the request
         body -- (optional) The POST/PUT body
+
+        Returns:
+            Two return values: headers, parameters
         '''
         if parameters == None:
             parameters = {}
 
         parameters["ApiSig"] = self._generate_signature(path, parameters, body)
+
+        return headers, parameters
 
     def register_session(self, access_token, refresh_token=None, 
             expires_at=None):
@@ -48,6 +60,9 @@ class SparkAuthClient(AuthClient):
         signature_string = "%sApiKey%s" % (self.consumer.secret, self.consumer.key)
         if self._is_authentication_path(path):
             return signature_string
+
+        if self.token == None:
+            raise ApplicationUnauthorizedException
 
         signature_string += "ServicePath%s" % path
         parameters["AuthToken"] = self.token.access_token

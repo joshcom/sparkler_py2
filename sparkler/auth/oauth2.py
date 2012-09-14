@@ -20,18 +20,23 @@ class OAuth2Client(AuthClient):
         super(OAuth2Client, self).__init__(consumer, auth_endpoint_uri, api_endpoint_uri)
         self.token = None
 
-    def authorize_request(self, headers, path=None, parameters=None, body=None):
+    def authorize_request(self, headers, parameters, path=None, body=None):
         '''Attaches authorization headers to headers, e.g.:
         Authorization: OAuth ACCESS_TOKEN
 
         Arguments
         headers -- A dictionary for request headers, which
                    will be modified.
+
+        Returns:
+            Two return values: headers, parameters
         '''
         if self.token == None or self.token.access_token == None:
             raise ApplicationUnauthorizedException()
 
         headers["Authorization"] = ("OAuth %s" % self.token.access_token)
+
+        return headers, parameters
 
     def register_session(self, access_token, refresh_token=None, 
             expires_at=None):
