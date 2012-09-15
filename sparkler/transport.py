@@ -194,8 +194,13 @@ class ApiRequest(Request):
 
 
     def _raise_http_status_exception(self, e):
-        code = e.response["Code"]
+        try: # TODO: Support Response#get
+            code = e.response["Code"]
+        except:
+            raise e
+
         if code == 1020:
             raise AuthExpiredException(e.response)
         else:
             raise e
+

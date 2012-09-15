@@ -20,6 +20,11 @@ class TestAuthFactory(unittest.TestCase):
         auth = AuthFactory.create(self.config)
         self.assertIsInstance(auth, oauth2.OAuth2Client)
 
+    def test_spark_hybrid_creation(self):
+        self.config["auth_mode"] = "hybrid"
+        auth = AuthFactory.create(self.config)
+        self.assertIsInstance(auth, oauth2.HybridClient)
+
     def test_spark_auth_creation(self):
         self.config["auth_mode"] = "spark_auth"
         auth = AuthFactory.create(self.config)
