@@ -1,4 +1,4 @@
-#### NOT YET READY
+Still in the early stages.  GET requests are fully supported, POST somewhat, others to come. See TODO at the bottom for details.
 
 Sparkler
 ========
