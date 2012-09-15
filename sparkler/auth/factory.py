@@ -1,6 +1,6 @@
 from sparkler.auth.client import *
 from sparkler.exceptions import *
-from sparkler.auth.oauth2 import OAuth2Client
+from sparkler.auth.oauth2 import OAuth2Client, HybridClient
 from sparkler.auth.spark_auth import SparkAuthClient
 
 class AuthFactory:
@@ -8,6 +8,7 @@ class AuthFactory:
     auth mechanism as defined in auth_mode'''
     auth_modes = {
             "oauth2": OAuth2Client,
+            "hybrid": HybridClient,
             "spark_auth": SparkAuthClient
     }
 

@@ -8,6 +8,33 @@ from sparkler.auth import client
 from mock import MagicMock
 from test.sparkler_test_helpers import SparklerStubber
 
+class TestHybirdClient(unittest.TestCase):
+    def setUp(self):
+        self.consumer = client.Consumer("my_key", "my_secret", 
+                "https://www.joshcom.net")
+        self.token = oauth2.OAuth2Token.parse(TestOauth2Token.example_token())
+        c = Configuration()
+        self.config = c.load_dict({
+            "key":"client_key",
+            "secret":"client_secret",
+            "auth_mode":"oauth2",
+            "auth_endpoint_uri":"https://developers.sparkplatform.com/openid",
+            "api_endpoint_uri": "https://sparkapi.com",
+            "auth_callback_uri":"https://www.joshcom.net/callback"
+        })
+
+        self.client = oauth2.HybridClient(self.consumer,self.config)
+
+    def test_authorization_uri(self):
+        url = self.client.authorization_uri()
+        for parameter in ["openid.mode=checkid_setup",
+         "openid.spark.combined_flow=true",
+         "openid.return_to=https%3A%2F%2Fwww.joshcom.net",
+         "openid.spark.client_id=my_key"]:
+            url = url.replace(parameter, "")
+        url = url.replace("&","")
+        self.assertEqual("https://developers.sparkplatform.com/openid?", url)
+
 class TestOauth2Client(unittest.TestCase):
     def setUp(self):
         self.consumer = client.Consumer("my_key", "my_secret", 

@@ -13,6 +13,8 @@ class Configuration():
         for key in options_dict:
             self.config[key] = options_dict[key]
 
+        self._detect_defaults()
+
         return self.config
 
     def reset(self):
@@ -27,3 +29,11 @@ class Configuration():
                 "data_access_version": "v1"
         }
         return self.config
+
+    def _detect_defaults(self):
+        auth_mode = self.config["auth_mode"]
+        if self.config.get("auth_enpoint_uri") == None:
+            if auth_mode == "openid":
+                self.config["auth_endpoint_uri"] = "https://sparkplatform.com/oauth2"
+            elif auth_mode == "spark_auth":
+                self.config["auth_endpoint_uri"] = "https://sparkapi.com/v1/session"

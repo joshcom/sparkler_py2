@@ -58,8 +58,7 @@ class OAuth2Client(AuthClient):
         '''Returns a string of the full URI, with paramters, the
         end user should be redirected to in order to authorize
         the client to access their data.'''
-        parameters = self._authorization_parameters()
-        parameters["response_type"] = "code"
+        parameters = self._authorization_endpoint_parameters()
         return Request(self.configuration, self.configuration["auth_endpoint_uri"]).build_request_uri("", 
                 parameters)
 
@@ -106,6 +105,11 @@ class OAuth2Client(AuthClient):
         request = ApiRequest(self.configuration)
         return request.post("oauth2/grant", parameters)
 
+    def _authorization_endpoint_parameters(self):
+        parameters = self._authorization_parameters()
+        parameters["response_type"] = "code"
+        return parameters
+
     def _authorization_parameters(self):
         return {
             "client_id": self.consumer.key,
@@ -116,6 +120,18 @@ class OAuth2Client(AuthClient):
         parameters = self._authorization_parameters()
         parameters["client_secret"] = self.consumer.secret
         return parameters
+
+class HybridClient(OAuth2Client):
+    def __init__(self, consumer, configuration):
+        super(HybridClient, self).__init__(consumer, configuration)
+
+    def _authorization_endpoint_parameters(self):
+        return {
+            "openid.mode"               : "checkid_setup",
+            "openid.spark.client_id"    : self.consumer.key,
+            "openid.return_to"          : self.consumer.callback_uri,
+            "openid.spark.combined_flow": "true"
+        }
 
 class OAuth2Token(Token):
     '''A record of an OAuth2 authorization.

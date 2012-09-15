@@ -10,6 +10,31 @@ TODO
 
 Usage Examples
 ========
+#### OpenID/OAuth 2 Hybrid
+    import sparkler
+    from sparkler.client import SparkClient
+
+    # Defaults are noted as the string values, unless those values are in all caps --
+    # those values should be replaced with the values assigned to your API key.
+    client =  SparkClient({
+        "key"       :"YOUR_CLIENT_KEY",  
+        "secret"    :"YOUR_CLIENT_SECRET", 
+        "auth_callback_uri":"YOUR_CALLBACK_URI", 
+        "api_user_agent"   :"YOUR_CUSTOM_API_CLIENT_NAME",
+        "auth_mode"        :"hybrid"
+    })
+
+    # Do the following only if you already have an access and refresh token
+    client.register_session("YOUR_ACCESS_TOKEN", "YOUR_REFRESH_TOKEN")
+
+    try:
+        listings = client.get("listings")
+    except sparkler.exceptions.ApplicationUnauthorizedException:
+        print("Go here and get your code: %s"  % client.auth.authorization_uri())
+        print("Send that code to client.auth.grant('CODE')")
+    except sparkler.exceptions.AuthExpiredException:
+        client.auth.refresh() # If the refresh is successful, attempt your request again.
+
 #### OAuth 2
     import sparkler
     from sparkler.client import SparkClient
@@ -21,9 +46,7 @@ Usage Examples
         "secret"    :"YOUR_CLIENT_SECRET", 
         "auth_callback_uri":"YOUR_CALLBACK_URI", 
         "api_user_agent"   :"YOUR_CUSTOM_API_CLIENT_NAME",
-        "auth_mode"        :"oauth2", # Default is "hybrid"
-        "auth_endpoint_uri":"https://sparkplatform.com/oauth2",
-        "api_endpoint_uri" :"https://sparkapi.com"
+        "auth_mode"        :"oauth2"  # Default is "hybrid"
     })
 
     # Do the following only if you already have an access and refresh token
@@ -47,12 +70,19 @@ Usage Examples
         "key"              :"YOUR_CLIENT_KEY",  
         "secret"           :"YOUR_CLIENT_SECRET", 
         "api_user_agent"   :"YOUR_CUSTOM_API_CLIENT_NAME",
-        "auth_mode"        :"spark_auth", 
-        "auth_endpoint_uri":"https://sparkapi.com/v1/session",
-        "api_endpoint_uri" :"https://sparkapi.com"})
+        "auth_mode"        :"spark_auth"
 
     client.auth.init_session()
     listings = client.get("listings")  
+
+### Additional Options
+While these are applied with defaults, you can further configure the client with the parameter examples below:
+    client =  SparkClient({
+        # ... required parameters omitted ...
+        "auth_endpoint_uri":"https://sparkplatform.com/openid",
+        "api_endpoint_uri" :"https://sparkapi.com",
+        "data_access_version": "v1"
+    })
 
 Logging
 =======
@@ -95,7 +125,5 @@ TODO
 ========
 * Clean up imports
 * Auto-init spark API auth, and auto-refresh
-* Hybrid flow
-* OpenID-only flow
 * API-Auth POST support
 * Implement PUT, DELETE
