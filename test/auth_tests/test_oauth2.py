@@ -1,6 +1,7 @@
 import unittest
 import time
 from sparkler.exceptions import *
+from sparkler.configuration import Configuration
 from sparkler.auth import oauth2
 from sparkler.response import Response
 from sparkler.auth import client
@@ -12,9 +13,17 @@ class TestOauth2Client(unittest.TestCase):
         self.consumer = client.Consumer("my_key", "my_secret", 
                 "https://www.joshcom.net")
         self.token = oauth2.OAuth2Token.parse(TestOauth2Token.example_token())
-        self.client = oauth2.OAuth2Client(self.consumer,
-                "https://developers.sparkplatform.com/oauth2",
-                "https://developers.sparkapi.com")
+        c = Configuration()
+        self.config = c.load_dict({
+            "key":"client_key",
+            "secret":"client_secret",
+            "auth_mode":"oauth2",
+            "auth_endpoint_uri":"https://developers.sparkplatform.com/oauth2?",
+            "api_endpoint_uri": "https://sparkapi.com",
+            "auth_callback_uri":"https://www.joshcom.net/callback"
+        })
+
+        self.client = oauth2.OAuth2Client(self.consumer,self.config)
 
     def mock_token_success(self):
         self.client._perform_token_request = MagicMock(return_value=Response.parse(\
@@ -22,6 +31,12 @@ class TestOauth2Client(unittest.TestCase):
 
     def test_init(self):
         self.assertIsInstance(self.client, oauth2.OAuth2Client)
+
+    def test_required_configuration_options(self):
+        self.config["key"] = None
+        self.assertRaises(ClientConfigurationException, oauth2.OAuth2Client,
+                self.consumer,self.config)
+
 
     def test_authorization_uri(self):
         # Seriously, what the heck am I doing here...
@@ -31,8 +46,7 @@ class TestOauth2Client(unittest.TestCase):
          "client_id=my_key"]:
             url = url.replace(parameter, "")
         url = url.replace("&","")
-        self.assertEqual("https://developers.sparkplatform.com/oauth2?",
-                url)
+        self.assertEqual("https://developers.sparkplatform.com/oauth2?", url)
 
     def test_grant_failture(self):
         self.client._perform_token_request = MagicMock(side_effect=\

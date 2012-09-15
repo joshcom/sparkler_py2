@@ -9,15 +9,26 @@ class AuthClient(object):
 
     Public instance variables:
     consumer -- The Consumer instance represented the client key
-    auth_endpoint_uri -- The URI of the auth endpoint to access or
-                         redirect the user to.
-    api_endpoint_uri  -- The URI of the API which we are requesting
-                         authorizatino for.
+    configuration -- References the client's configuration object
     '''
-    def __init__(self, consumer, auth_endpoint_uri, api_endpoint_uri):
+    def __init__(self, consumer, configuration):
         self.consumer = consumer
-        self.auth_endpoint_uri = auth_endpoint_uri
-        self.api_endpoint_uri = api_endpoint_uri
+        self.configuration = configuration
+        self.validate_configuration()
+
+
+    def validate_configuration(self):
+        '''To be implemented by the client.
+        Attaches authorization headers to headers.
+
+        Arguments:
+        None
+
+        Returns:
+        True if the supplied configuration is valid; False if not.
+        '''
+        raise NotImplementedError()
+
 
     def authorize_request(self, headers, parameters, path=None, body=None):
         '''To be implemented by the client.
@@ -58,6 +69,20 @@ class AuthClient(object):
         '''
         self.token = token
         return self.token
+
+    def validate_configuration_keys(self, keys):
+        for key in keys:
+            if self.configuration.get(key) == None:
+                ex_str = "%s requires a configuration value" % key
+                raise ClientConfigurationException(ex_str)
+
+    def auth_endpoint_uri(self):
+        return self.configuration["auth_endpoint_uri"]
+
+    def api_endpoint_uri(self):
+        return self.configuration["api_endpoint_uri"]
+
+
 
 class Consumer(object):
     '''Represents a client key, or a record of credentials for API access.

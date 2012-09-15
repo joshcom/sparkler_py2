@@ -7,15 +7,22 @@ import re
 import hashlib
 
 class SparkAuthClient(AuthClient):
-    def __init__(self, consumer, auth_endpoint_uri, api_endpoint_uri):
-        super(SparkAuthClient, self).__init__(consumer, auth_endpoint_uri, api_endpoint_uri)
+    def __init__(self, consumer, configuration):
+        super(SparkAuthClient, self).__init__(consumer, configuration)
         self.token = None
 
     def init_session(self):
-        request = ApiRequest(self.api_endpoint_uri)
-        results = request.post("/v1/session", {"ApiKey":self.consumer.key,
-                               "ApiSig":self._generate_signature("/v1/session", None, None)})
+        request = ApiRequest(self.configuration)
+        params = {
+          "ApiKey":self.consumer.key,
+          "ApiSig":self._generate_signature("/v1/session", None, None)
+        }
+        results = request.post("/v1/session", None, params)
         self.register_session(results["Results"][0]["AuthToken"])
+
+    def validate_configuration(self):
+        self.validate_configuration_keys(["key","secret",
+            "auth_endpoint_uri", "api_endpoint_uri"])
 
     def authorize_request(self, headers, parameters, path, body=None):
         '''To be implemented by the client.

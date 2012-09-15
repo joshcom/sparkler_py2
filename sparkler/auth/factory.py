@@ -1,4 +1,5 @@
 from sparkler.auth.client import *
+from sparkler.exceptions import *
 from sparkler.auth.oauth2 import OAuth2Client
 from sparkler.auth.spark_auth import SparkAuthClient
 
@@ -11,22 +12,28 @@ class AuthFactory:
     }
 
     @staticmethod
-    def create(auth_mode, client_key, client_secret, auth_endpoint_uri, 
-            api_endpoint_uri, auth_callback_uri=None):
+    def create(configuration):
         '''
         Arguments:
-        auth_mode -- The authentication/authorization mode, which determines
-                     which instance the factory will instantiate.
-        client_key -- The API client key
-        client_secret -- The API client secret
-        auth_endpoint_uri -- The URI fo the auth endpoint to redirect 
-                             end users to.
-        api_endpoint_uri -- The URI for the data access API
-
-        Keyword Arguments:
-        auth_callback_uri -- The optional callback URI
+        configuration -- A SafeConfigParser object defining:
+            * auth_mode -- The authentication/authorization mode, which determines
+                           which instance the factory will instantiate.
+            * key       -- The API client key
+            * secret    -- The API client secret
+            * auth_endpoint_uri -- The URI fo the auth endpoint to redirect 
+                                   end users to.
+            * api_endpoint_uri  -- The URI for the data access API
+            * auth_callback_uri -- The optional callback URI
         '''
-        consumer = Consumer(client_key, client_secret, auth_callback_uri)
-        return AuthFactory.auth_modes[auth_mode](consumer=consumer,
-            auth_endpoint_uri=auth_endpoint_uri, 
-            api_endpoint_uri=api_endpoint_uri)
+        try:
+            auth_mode = configuration["auth_mode"]
+            consumer = Consumer(configuration["key"], configuration["secret"], 
+                    configuration.get("auth_callback_uri"))
+            return AuthFactory.auth_modes[auth_mode](consumer, configuration)
+        except KeyError as e:
+            if e == 'key' or e == 'secret':
+                ex_str = "%s is a required configuration attribute" % (e)
+            else:
+                ex_str = "Unknown auth_mode configuration value"
+
+            raise ClientConfigurationException(ex_str)

@@ -10,15 +10,18 @@ class OAuth2Client(AuthClient):
     
     Public instance variables:
     consumer -- The Consumer instance represented the client key
-    auth_endpoint_uri -- The URI of the auth endpoint to access or
-                         redirect the user to.
-    api_endpoint_uri  -- The URI of the API which we are requesting
-                         authorizatino for.
+    configuration -- References the client's configuration object
     token -- An instance of the OAuth2Token class, which contains the access
              and refresh tokens for an API authorization.'''
-    def __init__(self, consumer, auth_endpoint_uri, api_endpoint_uri):
-        super(OAuth2Client, self).__init__(consumer, auth_endpoint_uri, api_endpoint_uri)
+    def __init__(self, consumer, configuration):
+        self.configuration = configuration
         self.token = None
+        super(OAuth2Client, self).__init__(consumer, configuration)
+
+    def validate_configuration(self):
+        self.validate_configuration_keys(["key","secret",
+            "auth_endpoint_uri", "api_endpoint_uri", "auth_callback_uri"])
+
 
     def authorize_request(self, headers, parameters, path=None, body=None):
         '''Attaches authorization headers to headers, e.g.:
@@ -57,7 +60,7 @@ class OAuth2Client(AuthClient):
         the client to access their data.'''
         parameters = self._authorization_parameters()
         parameters["response_type"] = "code"
-        return Request(self.auth_endpoint_uri).build_request_uri("", 
+        return Request(self.configuration, self.configuration["auth_endpoint_uri"]).build_request_uri("", 
                 parameters)
 
     def grant(self, code):
@@ -100,7 +103,7 @@ class OAuth2Client(AuthClient):
         return self.register_token(OAuth2Token.parse(response))
 
     def _perform_token_request(self, parameters):
-        request = ApiRequest(self.api_endpoint_uri)
+        request = ApiRequest(self.configuration)
         return request.post("oauth2/grant", parameters)
 
     def _authorization_parameters(self):

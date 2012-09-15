@@ -7,11 +7,15 @@ from sparkler.auth import oauth2
 
 class TestSparkClient(unittest.TestCase):
     def setUp(self):
-        self.client = SparkClient("client_key", "client_secret", "oauth2",
-                auth_callback_uri="https://www.joshcom.net/callback")
+        self.client = SparkClient({
+            "key":"client_key", 
+            "secret":"client_secret", 
+            "auth_mode":"oauth2",
+            "auth_callback_uri":"https://www.joshcom.net/callback"
+        })
 
     def test_defaults(self):
-        self.assertEqual("https://sparkplatform.com/oauth2", self.client.auth.auth_endpoint_uri)
+        self.assertEqual("https://sparkplatform.com/openid", self.client.auth.auth_endpoint_uri())
         self.assertEqual("v1", self.client.request.data_access_version)
 
     def test_auth_type(self):

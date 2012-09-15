@@ -16,12 +16,15 @@ Usage Examples
 
     # Defaults are noted as the string values, unless those values are in all caps --
     # those values should be replaced with the values assigned to your API key.
-    client =  SparkClient(client_key="YOUR_CLIENT_KEY",  
-                client_secret="YOUR_CLIENT_SECRET", 
-                auth_callback_uri="YOUR_CALLBACK_URI", 
-                auth_mode="oauth2", # Default is "hybrid"
-                auth_endpoint_uri="https://sparkplatform.com/oauth2",
-                api_endpoint_uri="https://sparkapi.com")
+    client =  SparkClient({
+        "key"       :"YOUR_CLIENT_KEY",  
+        "secret"    :"YOUR_CLIENT_SECRET", 
+        "auth_callback_uri":"YOUR_CALLBACK_URI", 
+        "api_user_agent"   :"YOUR_CUSTOM_API_CLIENT_NAME",
+        "auth_mode"        :"oauth2", # Default is "hybrid"
+        "auth_endpoint_uri":"https://sparkplatform.com/oauth2",
+        "api_endpoint_uri" :"https://sparkapi.com"
+    })
 
     # Do the following only if you already have an access and refresh token
     client.register_session("YOUR_ACCESS_TOKEN", "YOUR_REFRESH_TOKEN")
@@ -40,11 +43,13 @@ Usage Examples
 
     # Defaults are noted as the string values, unless those values are in all caps --
     # those values should be replaced with the values assigned to your API key.
-    client =  SparkClient(client_key="YOUR_CLIENT_KEY",  
-                          client_secret="YOUR_CLIENT_SECRET", 
-                          auth_mode="spark_auth", 
-                          auth_endpoint_uri="https://sparkapi.com/v1/session",
-                          api_endpoint_uri="https://sparkapi.com")
+    client =  SparkClient({
+        "key"              :"YOUR_CLIENT_KEY",  
+        "secret"           :"YOUR_CLIENT_SECRET", 
+        "api_user_agent"   :"YOUR_CUSTOM_API_CLIENT_NAME",
+        "auth_mode"        :"spark_auth", 
+        "auth_endpoint_uri":"https://sparkapi.com/v1/session",
+        "api_endpoint_uri" :"https://sparkapi.com"})
 
     client.auth.init_session()
     listings = client.get("listings")  
@@ -75,9 +80,10 @@ Raised when a step in the authorization process has failed.
 
 TODO
 ========
+* Logger
+* Clean up imports
 * Auto-init spark API auth, and auto-refresh
-* Configuruation improvements -- no more 1k parameter lists
 * Hybrid flow
 * OpenID-only flow
+* API-Auth POST support
 * Implement PUT, DELETE
-* Easy CLI?

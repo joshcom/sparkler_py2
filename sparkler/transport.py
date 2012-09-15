@@ -13,8 +13,12 @@ class Request(object):
     endpoint    -- The host to send requests to. 
     '''
 
-    def __init__(self, data_access_endpoint):
-        self.endpoint = data_access_endpoint
+    def __init__(self, configuration, endpoint=None):
+        self.configuration = configuration
+        if endpoint == None:
+            self.endpoint = self.configuration["api_endpoint_uri"]
+        else:
+            self.endpoint = endpoint
 
     def get(self, path, parameters=None):
         '''Returns a response.Response object after performing a GET request
@@ -29,7 +33,7 @@ class Request(object):
         '''
         return self._request('GET', path, parameters=parameters)
 
-    def post(self, path, body=None):
+    def post(self, path, body=None, parameters=None):
         '''Returns a response.Response object after performing a POST request
         to the endpoint.
 
@@ -37,9 +41,10 @@ class Request(object):
         path -- The path to append to the endpoint.
 
         Keyword Arguments:
-        body -- (optional) The body data to POST
+        body      -- (optional) The body data to POST
+        parameters -- (optional) URI parameters to supply (necessary for API Auth)
         '''
-        return self._request('POST', path, body=body)
+        return self._request('POST', path, body=body, parameters=parameters)
 
     def put(self, path, body=None):
         '''Returns a response.Response object after performing a PUT request
@@ -137,11 +142,9 @@ class ApiRequest(Request):
     data_access_version -- (optional) The api version, defaults to "v1"
     '''
 
-    def __init__(self, data_access_endpoint, auth_client=None, 
-          data_access_version="v1"):
-        super(ApiRequest, self).__init__(data_access_endpoint)
-        self.endpoint = data_access_endpoint
-        self.data_access_version = data_access_version
+    def __init__(self, configuration, auth_client=None):
+        super(ApiRequest, self).__init__(configuration)
+        self.data_access_version = configuration["api_version"]
         self.auth_client = auth_client
 
     def build_api_path(self, path):
@@ -161,9 +164,7 @@ class ApiRequest(Request):
         (self.get, etc.) rather than directly.
         '''
         path = self.build_api_path(path)
-        headers = {
-          "X-SparkApi-User-Agent" : "PythonClient: TODO"
-        }
+        headers = self._configuration_headers()
         if self.auth_client != None:
             headers, parameters = self.auth_client.authorize_request(headers,parameters,path=path,body=body)
 
@@ -174,6 +175,17 @@ class ApiRequest(Request):
             raise self._raise_http_status_exception(e)
 
         return response
+
+    def _configuration_headers(self):
+        h_name = self.configuration.get("api_user_agent")
+        if h_name == None:
+            ex_str = "api_user_agent is a required configuration value"
+            raise ClientConfigurationException(ex_str)
+
+        return {
+                "X-SparkApi-User-Agent" : h_name
+        }
+
 
     def _raise_http_status_exception(self, e):
         code = e.response["Code"]

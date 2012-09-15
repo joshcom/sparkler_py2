@@ -2,17 +2,26 @@ import unittest
 import time
 from sparkler.auth import spark_auth
 from sparkler.response import Response
+from sparkler.configuration import Configuration
 from sparkler.auth import client
 from mock import MagicMock
 from test.sparkler_test_helpers import SparklerStubber
+from sparkler.exceptions import *
 
 class TestSparkAuthClient(unittest.TestCase):
     def setUp(self):
         self.consumer = client.Consumer("my_key", "my_secret")
         self.token = spark_auth.SparkAuthToken.parse(TestSparkAuthToken.example_token())
-        self.client = spark_auth.SparkAuthClient(self.consumer,
-                "https://developers.sparkapi.com/v1/session",
-                "https://developers.sparkapi.com/v1/session")
+
+        c = Configuration()
+        self.config = c.load_dict({
+            "key":"client_key",
+            "secret":"client_secret",
+            "auth_mode":"spark_auth",
+            "auth_endpoint_uri":"https://developers.sparkapi.com/v1/session",
+            "api_endpoint_uri": "https://sparkapi.com"
+        })
+        self.client = spark_auth.SparkAuthClient(self.consumer,self.config)
         self.client.register_session(self.token.access_token)
 
     def mock_token_success(self):
@@ -29,6 +38,11 @@ class TestSparkAuthClient(unittest.TestCase):
 
     def test_init(self):
         self.assertIsInstance(self.client, spark_auth.SparkAuthClient)
+
+    def test_required_configuration_options(self):
+        self.config["key"] = None
+        self.assertRaises(ClientConfigurationException, spark_auth.SparkAuthClient,
+                self.consumer,self.config)
 
     def test_generate_signature(self):
         self.assertEqual("c731cf2455fbc7a4ef937b2301108d7a",

@@ -1,6 +1,9 @@
 '''Exceptions raised by the Sparkler client.
 '''
 
+class ClientConfigurationException(Exception):
+    pass
+
 class HttpStatusNotSuccessfulException(Exception):
     '''Raised any time the HTTP response was not >=200 and <=299.
     Public attributes:
