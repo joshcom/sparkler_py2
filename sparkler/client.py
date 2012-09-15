@@ -4,8 +4,11 @@
 from sparkler.transport import ApiRequest
 from sparkler.auth.factory import AuthFactory
 from sparkler.configuration import Configuration
+from sparkler.logger import SparkLogger
 
 class SparkClient:
+
+    logger = SparkLogger.create()
 
     '''The Spark API client.
     
