@@ -71,6 +71,7 @@ Usage Examples
         "secret"           :"YOUR_CLIENT_SECRET", 
         "api_user_agent"   :"YOUR_CUSTOM_API_CLIENT_NAME",
         "auth_mode"        :"spark_auth"
+    })
 
     client.auth.init_session()
     listings = client.get("listings")  
