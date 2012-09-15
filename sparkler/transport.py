@@ -5,8 +5,11 @@ import urllib
 import httplib2
 from sparkler.exceptions import *
 from sparkler.response import Response
+from sparkler.logger import SparkLogger
 
 class Request(object):
+    logger = SparkLogger.get()
+
     '''Handles HTTP requests.
 
     Public isntance variables:
@@ -115,10 +118,13 @@ class Request(object):
         if body != None:
             body = urllib.parse.urlencode(body)
 
+        Request.logger.debug("%s: %s" % (method, uri))
         response, content = self._http_request(uri, method, headers, body)
         parsed_response = Response.parse(content.decode('utf-8'))
 
         status = int(response['status'])
+        Request.logger.debug("HTTP Status %d" % status)
+
         if status >= 200 and status <= 299:
             return parsed_response 
         else:

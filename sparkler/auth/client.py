@@ -1,10 +1,12 @@
 import time
 from sparkler.transport import Request, ApiRequest
 from sparkler.exceptions import *
+from sparkler.logger import SparkLogger
 '''Base classes to be used or extended by all Auth clients.
 '''
 
 class AuthClient(object):
+    logger = SparkLogger.get()
     '''The base client for all auth mechinisms.
 
     Public instance variables:

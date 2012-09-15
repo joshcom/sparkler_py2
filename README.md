@@ -54,6 +54,16 @@ Usage Examples
     client.auth.init_session()
     listings = client.get("listings")  
 
+Logging
+=======
+The SparkApi client creates a global logger with the name 'spark_client'.  This can be accessed directly by the SparkClient.logger attribute.  For example, to change the client's logging to DEBUG:
+
+    import logging
+    SparkClient.logger.setLevel(logging.DEBUG)
+
+The logger level is set to INFO by default.
+
+
 Exceptions
 ========
 Custom sparkler exceptions are available in exceptions.py.  They are fairly well documented 
@@ -83,7 +93,6 @@ Raised when a step in the authorization process has failed.
 
 TODO
 ========
-* Logger
 * Clean up imports
 * Auto-init spark API auth, and auto-refresh
 * Hybrid flow

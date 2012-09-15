@@ -58,10 +58,13 @@ class SparkAuthClient(AuthClient):
 
     def _generate_signature(self, path, parameters, body):
         s = self._generate_signature_string(path, parameters, body)
+        AuthClient.logger.debug("Pre-hashed ApiSig: %s" % s)
         return self._hash_signature_string(s)
 
     def _hash_signature_string(self, s):
-        return hashlib.md5(s.encode('utf-8')).hexdigest()
+        hashed_s = hashlib.md5(s.encode('utf-8')).hexdigest()
+        AuthClient.logger.debug("Hashed ApiSig: %s" % hashed_s)
+        return hashed_s
 
     def _generate_signature_string(self, path, parameters, body):
         signature_string = "%sApiKey%s" % (self.consumer.secret, self.consumer.key)
