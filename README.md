@@ -77,12 +77,14 @@ Usage Examples
 
 ### Additional Options
 While these are applied with defaults, you can further configure the client with the parameter examples below:
+
     client =  SparkClient({
         # ... required parameters omitted ...
         "auth_endpoint_uri":"https://sparkplatform.com/openid",
         "api_endpoint_uri" :"https://sparkapi.com",
         "data_access_version": "v1"
     })
+
 
 Logging
 =======
@@ -124,3 +126,4 @@ TODO
 * Auto-init spark API auth, and auto-refresh
 * API-Auth POST support
 * Implement PUT, DELETE
+* Top-down reconfiguration on the fly
