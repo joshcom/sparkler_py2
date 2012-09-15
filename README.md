@@ -59,6 +59,9 @@ Exceptions
 Custom sparkler exceptions are available in exceptions.py.  They are fairly well documented 
 in that file, but to reiterate:
 
+### ClientConfigurationException
+Raised when a required client configuration setting is not supplied.
+
 #### HttpStatusNotSuccessfulException
 Raised when a request to the API resulted in a non-2xx code, and did not fit the use
 case for another exception above.  This exception instance will have the public 
