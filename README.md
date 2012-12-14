@@ -1,5 +1,3 @@
-Still in the early stages.  GET requests are fully supported, POST somewhat, others to come. See TODO at the bottom for details.
-
 Sparkler
 ========
 A Python 3 client for Spark API: http://sparkplatform.com/docs/overview/api
@@ -114,7 +112,6 @@ Raised when a step in the authorization process has failed.
 
 TODO
 ========
-* Clean up imports
 * Auto-refresh oauth2
-* Implement PUT, DELETE
+* Clean up imports
 * Top-down reconfiguration on the fly
