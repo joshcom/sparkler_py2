@@ -60,8 +60,7 @@ class Request(object):
         Keyword Arguments:
         body -- (optional) The body data to PUT 
         '''
-        pass # TODO
-        # return self._request('PUT', path, body=body)
+        return self._request('PUT', path, body=body)
 
     def delete(self, path, parameters=None):
         '''Returns a response.Response object after performing a DELETE request
@@ -74,8 +73,7 @@ class Request(object):
         parameters -- (optional) The hash of parameters to send along with
                       the request
         '''
-        pass # TODO
-        # return self._request('DELETE', path, parameters=parameters)
+        return self._request('DELETE', path, parameters=parameters)
 
     def build_request_uri(self, path, parameters=None):
         '''Returns a string of the URI to send a HTTP request to.
