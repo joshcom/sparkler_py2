@@ -8,7 +8,20 @@ from mock import MagicMock
 from test.sparkler_test_helpers import SparklerStubber
 from sparkler.exceptions import *
 
+
 class TestSparkAuthClient(unittest.TestCase):
+    def test_init(self):
+        self.consumer = client.Consumer("my_key", "my_secret")
+        c = Configuration()
+        self.config = c.load_dict({
+            "key":"client_key",
+            "secret":"client_secret",
+            "auth_mode":"spark_auth",
+            "auth_endpoint_uri":"https://developers.sparkapi.com/v1/session",
+            "api_endpoint_uri": "https://sparkapi.com"
+        })
+        self.assertRaises(RuntimeError, spark_auth.SparkAuthClient, self.consumer, self.config)
+"""
     def setUp(self):
         self.consumer = client.Consumer("my_key", "my_secret")
         self.token = spark_auth.SparkAuthToken.parse(TestSparkAuthToken.example_token())
@@ -91,6 +104,7 @@ class TestSparkAuthClient(unittest.TestCase):
 
         for path in bad_paths:
             self.assertFalse(self.client._is_authentication_path(path))
+"""
         
 
 
@@ -115,3 +129,4 @@ class TestSparkAuthToken(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

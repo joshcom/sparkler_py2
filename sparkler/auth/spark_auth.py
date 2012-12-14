@@ -8,6 +8,7 @@ import hashlib
 
 class SparkAuthClient(AuthClient):
     def __init__(self, consumer, configuration):
+        raise RuntimeError("Spark API Auth is not supported.  Please request an OAuth 2 key.")
         super(SparkAuthClient, self).__init__(consumer, configuration)
         self.token = None
 

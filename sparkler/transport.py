@@ -3,6 +3,7 @@
 '''
 import urllib
 import httplib2
+import json
 from sparkler.exceptions import *
 from sparkler.response import Response
 from sparkler.logger import SparkLogger
@@ -116,7 +117,7 @@ class Request(object):
         uri = self.build_request_uri(path, parameters=parameters)
 
         if body != None:
-            body = urllib.parse.urlencode(body)
+            body = json.dumps(body)
 
         Request.logger.debug("%s: %s" % (method, uri))
         response, content = self._http_request(uri, method, headers, body)
@@ -172,7 +173,11 @@ class ApiRequest(Request):
         path = self.build_api_path(path)
         headers = self._configuration_headers()
         if self.auth_client != None:
+            body = self._wrap_in_magic_d(body)
             headers, parameters = self.auth_client.authorize_request(headers,parameters,path=path,body=body)
+
+        if body != None:
+            headers["Content-Type"] = "application/json"
 
         try:
             response = super(ApiRequest, self)._request(method, path, headers=headers,
@@ -181,6 +186,12 @@ class ApiRequest(Request):
             raise self._raise_http_status_exception(e)
 
         return response
+
+    def _wrap_in_magic_d(self, body=None):
+        if body != None and "D" not in body:
+            return {"D": body}
+        else:
+            return body
 
     def _configuration_headers(self):
         h_name = self.configuration.get("api_user_agent")

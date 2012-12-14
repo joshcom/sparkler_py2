@@ -87,6 +87,13 @@ class TestApiRequest(unittest.TestCase):
         e = HttpStatusNotSuccessfulException(r)
         self.assertRaises(HttpStatusNotSuccessfulException,
                 self.request._raise_http_status_exception, (e))
-                    
+
+    def test_wrap_in_magic_d(self):
+        d = self.request._wrap_in_magic_d({"Name": "Joshua"})
+        self.assertEqual({"D": {"Name": "Joshua"}}, d)
+        d = self.request._wrap_in_magic_d({"D":{"Name": "Joshua"}})
+        self.assertEqual({"D": {"Name": "Joshua"}}, d)
+        d = self.request._wrap_in_magic_d()
+        self.assertEqual(None, d)
 
 

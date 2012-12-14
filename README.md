@@ -35,7 +35,7 @@ Usage Examples
     except sparkler.exceptions.AuthExpiredException:
         client.auth.refresh() # If the refresh is successful, attempt your request again.
 
-#### OAuth 2
+#### OAuth 2 (OpenID/OAuth 2 Hybrid flow is recommended)
     import sparkler
     from sparkler.client import SparkClient
 
@@ -61,20 +61,8 @@ Usage Examples
         client.auth.refresh() # If the refresh is successful, attempt your request again.
 
 ### SparkApi Auth
-    import sparkler
-    from sparkler.client import SparkClient
-
-    # Defaults are noted as the string values, unless those values are in all caps --
-    # those values should be replaced with the values assigned to your API key.
-    client =  SparkClient({
-        "key"              :"YOUR_CLIENT_KEY",  
-        "secret"           :"YOUR_CLIENT_SECRET", 
-        "api_user_agent"   :"YOUR_CUSTOM_API_CLIENT_NAME",
-        "auth_mode"        :"spark_auth"
-    })
-
-    client.auth.init_session()
-    listings = client.get("listings")  
+Not supported.  We encourage you to ask for an OAuth 2 key as a replacement for a SparkApi Auth key, if that's
+what you were provided.
 
 ### Additional Options
 While these are applied with defaults, you can further configure the client with the parameter examples below:
@@ -127,7 +115,6 @@ Raised when a step in the authorization process has failed.
 TODO
 ========
 * Clean up imports
-* Auto-init spark API auth, and auto-refresh
-* API-Auth POST support
+* Auto-refresh oauth2
 * Implement PUT, DELETE
 * Top-down reconfiguration on the fly

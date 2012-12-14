@@ -27,8 +27,7 @@ class TestAuthFactory(unittest.TestCase):
 
     def test_spark_auth_creation(self):
         self.config["auth_mode"] = "spark_auth"
-        auth = AuthFactory.create(self.config)
-        self.assertIsInstance(auth, spark_auth.SparkAuthClient)
+        self.assertRaises(RuntimeError, AuthFactory.create, self.config)
 
     def test_unknown_client(self):
         self.config["auth_mode"] = "josh_auth"
