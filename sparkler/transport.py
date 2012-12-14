@@ -3,18 +3,26 @@
 '''
 import urllib
 import httplib2
+import json
 from sparkler.exceptions import *
 from sparkler.response import Response
+from sparkler.logger import SparkLogger
 
 class Request(object):
+    logger = SparkLogger.get()
+
     '''Handles HTTP requests.
 
     Public isntance variables:
     endpoint    -- The host to send requests to. 
     '''
 
-    def __init__(self, data_access_endpoint):
-        self.endpoint = data_access_endpoint
+    def __init__(self, configuration, endpoint=None):
+        self.configuration = configuration
+        if endpoint == None:
+            self.endpoint = self.configuration["api_endpoint_uri"]
+        else:
+            self.endpoint = endpoint
 
     def get(self, path, parameters=None):
         '''Returns a response.Response object after performing a GET request
@@ -29,7 +37,7 @@ class Request(object):
         '''
         return self._request('GET', path, parameters=parameters)
 
-    def post(self, path, body=None):
+    def post(self, path, body=None, parameters=None):
         '''Returns a response.Response object after performing a POST request
         to the endpoint.
 
@@ -37,9 +45,10 @@ class Request(object):
         path -- The path to append to the endpoint.
 
         Keyword Arguments:
-        body -- (optional) The body data to POST
+        body      -- (optional) The body data to POST
+        parameters -- (optional) URI parameters to supply (necessary for API Auth)
         '''
-        return self._request('POST', path, body=body)
+        return self._request('POST', path, body=body, parameters=parameters)
 
     def put(self, path, body=None):
         '''Returns a response.Response object after performing a PUT request
@@ -51,8 +60,7 @@ class Request(object):
         Keyword Arguments:
         body -- (optional) The body data to PUT 
         '''
-        pass # TODO
-        # return self._request('PUT', path, body=body)
+        return self._request('PUT', path, body=body)
 
     def delete(self, path, parameters=None):
         '''Returns a response.Response object after performing a DELETE request
@@ -65,8 +73,7 @@ class Request(object):
         parameters -- (optional) The hash of parameters to send along with
                       the request
         '''
-        pass # TODO
-        # return self._request('DELETE', path, parameters=parameters)
+        return self._request('DELETE', path, parameters=parameters)
 
     def build_request_uri(self, path, parameters=None):
         '''Returns a string of the URI to send a HTTP request to.
@@ -106,26 +113,29 @@ class Request(object):
         '''Performs an HTTP request.  Should be called through a wrapper method
         (self.get, etc.) rather than directly.
         '''
-        http = httplib2.Http()
         uri = self.build_request_uri(path, parameters=parameters)
 
-        # PYTHON2: urllib.parse.urlencode in python 3 version
         if body != None:
-            body = urllib.urlencode(body)
+            body = json.dumps(body)
 
+        Request.logger.debug("%s: %s" % (method, uri))
         response, content = self._http_request(uri, method, headers, body)
         parsed_response = Response.parse(content.decode('utf-8'))
 
-        if response >= 200 and response <= 299:
+        status = int(response['status'])
+        Request.logger.debug("HTTP Status %d" % status)
+
+        if status >= 200 and status <= 299:
             return parsed_response 
         else:
             raise HttpStatusNotSuccessfulException(parsed_response)
 
-    def _http_request(uri, method, headers=None, body=None):
+    def _http_request(self, uri, method, headers=None, body=None):
         '''A dumb wrapper for http.request, largely for stubbing
         when testing.
         '''
-        http.request(uri, method, headers=headers, body=body)
+        http = httplib2.Http()
+        return http.request(uri, method, headers=headers, body=body)
 
 class ApiRequest(Request):
     '''Handles HTTP requests specifically intended for the Spark API endpoint
@@ -138,11 +148,9 @@ class ApiRequest(Request):
     data_access_version -- (optional) The api version, defaults to "v1"
     '''
 
-    def __init__(self, data_access_endpoint, auth_client=None, 
-          data_access_version="v1"):
-        super(ApiRequest, self).__init__(data_access_endpoint)
-        self.endpoint = data_access_endpoint
-        self.data_access_version = data_access_version
+    def __init__(self, configuration, auth_client=None):
+        super(ApiRequest, self).__init__(configuration)
+        self.data_access_version = configuration["api_version"]
         self.auth_client = auth_client
 
     def build_api_path(self, path):
@@ -162,9 +170,13 @@ class ApiRequest(Request):
         (self.get, etc.) rather than directly.
         '''
         path = self.build_api_path(path)
-        headers = {}
+        headers = self._configuration_headers()
         if self.auth_client != None:
-            self.auth_client.authorize_request(headers=headers)
+            body = self._wrap_in_magic_d(body)
+            headers, parameters = self.auth_client.authorize_request(headers,parameters,path=path,body=body)
+
+        if body != None:
+            headers["Content-Type"] = "application/json"
 
         try:
             response = super(ApiRequest, self)._request(method, path, headers=headers,
@@ -174,9 +186,31 @@ class ApiRequest(Request):
 
         return response
 
+    def _wrap_in_magic_d(self, body=None):
+        if body != None and "D" not in body:
+            return {"D": body}
+        else:
+            return body
+
+    def _configuration_headers(self):
+        h_name = self.configuration.get("api_user_agent")
+        if h_name == None:
+            ex_str = "api_user_agent is a required configuration value"
+            raise ClientConfigurationException(ex_str)
+
+        return {
+                "X-SparkApi-User-Agent" : h_name
+        }
+
+
     def _raise_http_status_exception(self, e):
-        code = e.response["Code"]
+        try: # TODO: Support Response#get
+            code = e.response["Code"]
+        except:
+            raise e
+
         if code == 1020:
             raise AuthExpiredException(e.response)
         else:
             raise e
+

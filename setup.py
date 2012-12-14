@@ -17,7 +17,7 @@ A Spark API client written in Python""",
       packages=find_packages(exclude=['ez_setup', 'examples','tests']),
       include_package_data=True,
       zip_safe=True,
-      install_requires=['httplib2','mock'],
+      install_requires=['httplib2','mock','configparser'],
       entry_points="""
       # -*- Entry points: -*-
       """,

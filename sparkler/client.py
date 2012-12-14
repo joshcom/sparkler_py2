@@ -3,8 +3,13 @@
 
 from sparkler.transport import ApiRequest
 from sparkler.auth.factory import AuthFactory
+from sparkler.configuration import Configuration
+from sparkler.logger import SparkLogger
 
 class SparkClient:
+
+    logger = SparkLogger.create()
+
     '''The Spark API client.
     
     Public instance variables:
@@ -22,15 +27,11 @@ class SparkClient:
         -- put
         -- delete
     '''
-    def __init__(self, client_key, client_secret, auth_mode="hybrid", 
-            auth_endpoint_uri="https://sparkplatform.com/oauth2",
-            api_endpoint_uri="https://sparkapi.com",
-            auth_callback_uri=None,
-            data_access_version="v1"):
-        self.auth = AuthFactory.create(auth_mode, client_key, client_secret,
-                auth_endpoint_uri, api_endpoint_uri, auth_callback_uri)
-        self.request = ApiRequest(api_endpoint_uri, self.auth, 
-                         data_access_version)
+    def __init__(self, options_dict={}):
+        # TODO: Reconfigre on the fly
+        c = Configuration(options_dict)
+        self.auth = AuthFactory.create(c.config)
+        self.request = ApiRequest(c.config, self.auth)
 
     def __getattr__(self, attrib):
         if attrib in ["get", "post", "put", "delete"]:
