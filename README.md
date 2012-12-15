@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/joshcom/sparkler_py2.png)](https://travis-ci.org/joshcom/sparkler_py2)
+[![Build Status](https://travis-ci.org/joshcom/sparkler_py2.png?branch=master)](https://travis-ci.org/joshcom/sparkler_py2)
 
 Sparkler
 ========
