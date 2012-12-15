@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/joshcom/sparkler_py2.png)](https://travis-ci.org/joshcom/sparkler_py2)
+
 Sparkler
 ========
 A Python 2 client for Spark API: http://sparkplatform.com/docs/overview/api
